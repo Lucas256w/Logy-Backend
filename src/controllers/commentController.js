@@ -12,7 +12,9 @@ const validateComment = [
 
 // Get all comments for a specific post
 exports.get_comments = asyncHandler(async (req, res) => {
-  const comments = await Comment.find({ post: req.body.postId }).exec();
+  const comments = await Comment.find({ post: req.body.postId })
+    .populate("user")
+    .exec();
   if (!comments) {
     return res.status(404).json({ message: "No comments found for this post" });
   }

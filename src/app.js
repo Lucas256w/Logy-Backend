@@ -31,11 +31,13 @@ async function main() {
 
 const postRoutes = require("./routes/postRoute");
 const commentRoutes = require("./routes/commentRoute");
-const userRoutes = require("./routes//userRoute");
+const userRoutes = require("./routes/userRoute");
+const authroRoutes = require("./routes/authorRoute");
 
 app.use("/api", postRoutes);
 app.use("/api", commentRoutes);
 app.use("/api", userRoutes);
+app.use("/api", authroRoutes);
 
 // ---------------------------------------------- ERROR HANDLER -------------------------------
 
