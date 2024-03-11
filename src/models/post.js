@@ -8,6 +8,7 @@ const PostSchema = new Schema({
   content: { type: String, required: true },
   date: { type: Date, required: true, default: Date.now() },
   author: { type: Schema.Types.ObjectId, required: true, ref: "Author" },
+  published: { type: Boolean, required: true },
 });
 
 PostSchema.virtual("date_formatted").get(function () {
