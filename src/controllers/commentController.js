@@ -1,5 +1,5 @@
 const Comment = require("../models/comment");
-const { body, validationResult } = require("express-async-handler");
+const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
 // Get all comments for a blog
@@ -26,11 +26,11 @@ exports.post_comment = [
     });
 
     if (!errors.isEmpty()) {
-      res.json({ error: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     } else {
       await message.save();
 
-      res.json({ success: true });
+      res.json(req.body);
     }
   }),
 ];

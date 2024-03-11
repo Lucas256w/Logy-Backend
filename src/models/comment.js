@@ -10,7 +10,7 @@ const CommentSchema = new Schema({
   post: { type: Schema.Types.ObjectId, required: true, ref: "Post" },
 });
 
-PostSchema.virtual("date_formatted").get(function () {
+CommentSchema.virtual("date_formatted").get(function () {
   return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_FULL);
 });
 

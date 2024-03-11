@@ -29,9 +29,8 @@ async function main() {
 
 // ---------------------------------------------- ROUTES -------------------------------
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+const postRoutes = require("./routes/postRoute");
+app.use("/api", postRoutes);
 
 // ---------------------------------------------- ERROR HANDLER -------------------------------
 
