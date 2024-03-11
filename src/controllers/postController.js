@@ -1,44 +1,41 @@
 const Post = require("../models/post");
-const Comment = require("../models/comment");
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
-// Get all post for homepage
+// Helper function to validate post inputs
+const validatePost = [
+  body("title", "Need a title").trim().isLength({ min: 1 }).escape(),
+  body("content", "Need content").trim().isLength({ min: 1 }).escape(),
+];
+
+// Get all published posts for the homepage
 exports.get_all_posts = asyncHandler(async (req, res) => {
   const posts = await Post.find({ published: true }).exec();
-
   res.json(posts);
 });
 
-// Get all post for author page
+// Get all posts for an author's page
 exports.get_all_posts_author = asyncHandler(async (req, res) => {
   const posts = await Post.find().exec();
-
   res.json(posts);
 });
 
-// Get specific post for post page
+// Get a specific post for the post page
 exports.get_post = asyncHandler(async (req, res) => {
   const post = await Post.findById(req.params.id).exec();
-
+  if (!post) {
+    return res.status(404).json({ message: "Post not found" });
+  }
   res.json(post);
 });
 
-// Post a post
-exports.post_post = [
-  body("title")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Need a title")
-    .escape(),
-  body("content")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Need content")
-    .escape(),
-
+// Create a new post
+exports.post_post = validatePost.concat(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
     const newPost = new Post({
       title: req.body.title,
@@ -47,59 +44,59 @@ exports.post_post = [
       date: Date.now(),
     });
 
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    } else {
-      try {
-        await newPost.save();
-        res.json(req.body);
-      } catch (err) {
-        res.json(err.message);
-      }
+    try {
+      const post = await newPost.save();
+      res.status(201).json(post);
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "Failed to create post", error: err.message });
     }
-  }),
-];
+  })
+);
 
-// Edit a post
-exports.edit_post = [
-  body("title")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Need a title")
-    .escape(),
-  body("content")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Need content")
-    .escape(),
-
+// Edit an existing post
+exports.edit_post = validatePost.concat(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
-
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
-    } else {
-      await Post.updateOne(
-        { _id: req.params.id },
-        {
-          $set: {
-            title: req.body.title,
-            content: req.body.content,
-            published: req.body.published,
-            date: Date.now(),
-          },
-        }
-      );
-
-      res.json(req.body);
     }
-  }),
-];
 
-// delete a post
+    try {
+      const post = await Post.findByIdAndUpdate(
+        req.params.id,
+        {
+          title: req.body.title,
+          content: req.body.content,
+          published: req.body.published,
+          date: Date.now(),
+        },
+        { new: true } // Returns the updated document
+      );
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      res.json(post);
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "Failed to update post", error: err.message });
+    }
+  })
+);
 
+// Delete a post
 exports.delete_post = asyncHandler(async (req, res) => {
-  await Post.deleteOne({ _id: req.params.id });
-
-  res.json(req.body);
+  try {
+    const result = await Post.deleteOne({ _id: req.params.id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    res.status(204).send(); // No content to send back
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to delete post", error: err.message });
+  }
 });

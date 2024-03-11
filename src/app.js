@@ -30,7 +30,12 @@ async function main() {
 // ---------------------------------------------- ROUTES -------------------------------
 
 const postRoutes = require("./routes/postRoute");
+const commentRoutes = require("./routes/commentRoute");
+const userRoutes = require("./routes//userRoute");
+
 app.use("/api", postRoutes);
+app.use("/api", commentRoutes);
+app.use("/api", userRoutes);
 
 // ---------------------------------------------- ERROR HANDLER -------------------------------
 

@@ -2,23 +2,30 @@ const Comment = require("../models/comment");
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
-// Get all comments for a post
-exports.get_comments = asyncHandler(async (req, res) => {
-  const comments = Comment.find({ post: req.postId }).exec();
+// Validate comment input
+const validateComment = [
+  body("content", "Comment cannot be empty")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+];
 
+// Get all comments for a specific post
+exports.get_comments = asyncHandler(async (req, res) => {
+  const comments = await Comment.find({ post: req.body.postId }).exec();
+  if (!comments) {
+    return res.status(404).json({ message: "No comments found for this post" });
+  }
   res.json(comments);
 });
 
-// Post a comment on a post
-exports.post_comment = [
-  body("content")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Comment can not be empty")
-    .escape(),
-
+// Post a new comment on a post
+exports.post_comment = validateComment.concat(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
     const newComment = new Comment({
       content: req.body.content,
@@ -27,15 +34,13 @@ exports.post_comment = [
       post: req.body.postId,
     });
 
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    } else {
-      try {
-        await newComment.save();
-        res.json(req.body);
-      } catch (err) {
-        res.json(err.message);
-      }
+    try {
+      const comment = await newComment.save();
+      res.status(201).json(comment);
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "Failed to post comment", error: err.message });
     }
-  }),
-];
+  })
+);
