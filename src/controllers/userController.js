@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 
@@ -51,8 +52,20 @@ exports.find_user = validate("find_user").concat(
 
     const match = await bcrypt.compare(req.body.password, user.password);
     if (match) {
-      // You can add token generation logic here if you're using JWT for authentication
-      return res.json({ message: "Login successful", user });
+      // USE JWT TO SIGN USER AND SEND TOKEN
+      jwt.sign(
+        { user },
+        process.env.SECRET_KEY,
+        { expiresIn: "2 days" },
+        (err, token) => {
+          return res.json({
+            message: "Login successful",
+            username: user.username,
+            id: user.id,
+            token,
+          });
+        }
+      );
     } else {
       return res
         .status(401)
@@ -60,6 +73,11 @@ exports.find_user = validate("find_user").concat(
     }
   })
 );
+
+// re-login handler
+exports.re_login_user = asyncHandler(async (req, res) => {
+  res.json({ username: req.user.username, id: req.user.id });
+});
 
 // Sign up handler
 exports.new_user = validate("new_user").concat(
@@ -87,7 +105,7 @@ exports.new_user = validate("new_user").concat(
 
     try {
       const user = await newUser.save();
-      res.json({ message: "User created successfully", user });
+      res.json({ message: "User created successfully" });
     } catch (error) {
       // Handle errors like duplicate username/email
       res.status(500).json({

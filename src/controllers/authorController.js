@@ -50,8 +50,19 @@ exports.find_author = validate("find_author").concat(
 
     const match = await bcrypt.compare(req.body.password, author.password);
     if (match) {
-      // You can add token generation logic here if you're using JWT for authentication
-      return res.json({ message: "Login successful", author });
+      jwt.sign(
+        { user },
+        process.env.SECRET_KEY,
+        { expiresIn: "2 days" },
+        (err, token) => {
+          return res.json({
+            message: "Login successful",
+            username: user.username,
+            id: user.id,
+            token,
+          });
+        }
+      );
     } else {
       return res
         .status(401)
