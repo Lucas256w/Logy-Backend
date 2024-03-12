@@ -6,12 +6,14 @@ const logger = require("morgan");
 const compression = require("compression");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
+const cors = require("cors");
 
 // ---------------------------------------------- GENERAL SETTINGS -------------------------------
 
 require("dotenv").config();
 const app = express();
 
+app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(compression());
 app.use(logger("dev"));

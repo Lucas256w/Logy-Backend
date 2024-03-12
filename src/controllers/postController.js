@@ -1,6 +1,7 @@
 const Post = require("../models/post");
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
+const he = require("he");
 
 // Helper function to validate post inputs
 const validatePost = [
@@ -11,7 +12,12 @@ const validatePost = [
 // Get all published posts for the homepage
 exports.get_all_posts = asyncHandler(async (req, res) => {
   const posts = await Post.find({ published: true }).exec();
-  res.json(posts);
+  const decodedPosts = posts.map((post) => ({
+    id: post.id,
+    title: he.decode(post.title),
+  }));
+  console.log(decodedPosts);
+  res.json(decodedPosts);
 });
 
 // Get all posts for an author's page
@@ -36,6 +42,8 @@ exports.post_post = validatePost.concat(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+
+    console.log("hello");
 
     const newPost = new Post({
       title: req.body.title,

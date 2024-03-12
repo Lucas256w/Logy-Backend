@@ -2,6 +2,7 @@ const Author = require("../models/author");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
 
 // Function to validate input fields
 const validate = (method) => {
@@ -51,14 +52,15 @@ exports.find_author = validate("find_author").concat(
     const match = await bcrypt.compare(req.body.password, author.password);
     if (match) {
       jwt.sign(
-        { user },
+        { author },
         process.env.SECRET_KEY,
         { expiresIn: "2 days" },
         (err, token) => {
+          console.log("hello");
           return res.json({
             message: "Login successful",
-            username: user.username,
-            id: user.id,
+            username: author.username,
+            id: author.id,
             token,
           });
         }
