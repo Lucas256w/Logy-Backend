@@ -16,7 +16,6 @@ exports.get_all_posts = asyncHandler(async (req, res) => {
     id: post.id,
     title: he.decode(post.title),
   }));
-  console.log(decodedPosts);
   res.json(decodedPosts);
 });
 
@@ -32,7 +31,11 @@ exports.get_post = asyncHandler(async (req, res) => {
   if (!post) {
     return res.status(404).json({ message: "Post not found" });
   }
-  res.json(post);
+  res.json({
+    title: he.decode(post.title),
+    content: he.decode(post.content),
+    date: post.date_formatted,
+  });
 });
 
 // Create a new post

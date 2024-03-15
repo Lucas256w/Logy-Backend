@@ -6,13 +6,12 @@ const verifyToken = (req, res, next) => {
   if (bearerHeader) {
     const token = bearerHeader.split(" ")[1]; // Bearer <token>
 
-    console.log("hello");
     jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
       if (err) {
         return res.sendStatus(403);
       }
 
-      req.user = user;
+      req.user = user.user;
       next();
     });
   } else {

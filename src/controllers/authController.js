@@ -76,7 +76,7 @@ exports.find_user = validate("find_user").concat(
 
 // re-login handler
 exports.re_login_user = asyncHandler(async (req, res) => {
-  res.json({ username: req.user.username, id: req.user.id });
+  res.json({ username: req.user.username, id: req.user._id });
 });
 
 // Sign up handler
@@ -105,7 +105,7 @@ exports.new_user = validate("new_user").concat(
 
     try {
       const user = await newUser.save();
-      res.json({ message: "User created successfully" });
+      res.status(201).json({ message: "User created successfully" });
     } catch (error) {
       // Handle errors like duplicate username/email
       res.status(500).json({

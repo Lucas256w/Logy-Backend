@@ -12,7 +12,8 @@ const validateComment = [
 
 // Get all comments for a specific post
 exports.get_comments = asyncHandler(async (req, res) => {
-  const comments = await Comment.find({ post: req.body.postId })
+  const comments = await Comment.find({ post: req.params.id })
+    .sort({ date: -1 })
     .populate({
       path: "user",
       select: "username",
@@ -22,7 +23,13 @@ exports.get_comments = asyncHandler(async (req, res) => {
   if (!comments) {
     return res.status(404).json({ message: "No comments found for this post" });
   }
-  res.json(comments);
+  const filteredCommnets = comments.map((comment) => ({
+    content: comment.content,
+    user: comment.user.username,
+    date: comment.date_formatted,
+    id: comment.id,
+  }));
+  res.json(filteredCommnets);
 });
 
 // Post a new comment on a post
@@ -42,7 +49,7 @@ exports.post_comment = validateComment.concat(
 
     try {
       const comment = await newComment.save();
-      res.status(201).json(comment);
+      res.status(201).json({ date: comment.date_formatted, id: comment.id });
     } catch (err) {
       res
         .status(500)
