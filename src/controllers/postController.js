@@ -22,7 +22,12 @@ exports.get_all_posts = asyncHandler(async (req, res) => {
 // Get all posts for an author's page
 exports.get_all_posts_author = asyncHandler(async (req, res) => {
   const posts = await Post.find().exec();
-  res.json(posts);
+  const decodedPosts = posts.map((post) => ({
+    id: post.id,
+    title: he.decode(post.title),
+    published: post.published,
+  }));
+  res.json(decodedPosts);
 });
 
 // Get a specific post for the post page
@@ -35,6 +40,7 @@ exports.get_post = asyncHandler(async (req, res) => {
     title: he.decode(post.title),
     content: he.decode(post.content),
     date: post.date_formatted,
+    published: post.published,
   });
 });
 

@@ -53,10 +53,9 @@ exports.find_author = validate("find_author").concat(
     if (match) {
       jwt.sign(
         { author },
-        process.env.SECRET_KEY,
+        process.env.SECRET_KEY_AUTHOR,
         { expiresIn: "2 days" },
         (err, token) => {
-          console.log("hello");
           return res.json({
             message: "Login successful",
             username: author.username,
@@ -72,6 +71,11 @@ exports.find_author = validate("find_author").concat(
     }
   })
 );
+
+// re-login handler
+exports.re_login_author = asyncHandler(async (req, res) => {
+  res.json({ username: req.user.username, id: req.user._id });
+});
 
 // Sign up handler
 exports.new_author = validate("new_author").concat(

@@ -13,7 +13,11 @@ const cors = require("cors");
 require("dotenv").config();
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.CORS_ALLOWED_ORIGINS.split(","),
+};
+
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(compression());
 app.use(logger("dev"));

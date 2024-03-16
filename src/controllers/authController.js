@@ -55,7 +55,7 @@ exports.find_user = validate("find_user").concat(
       // USE JWT TO SIGN USER AND SEND TOKEN
       jwt.sign(
         { user },
-        process.env.SECRET_KEY,
+        process.env.SECRET_KEY_PUBLIC,
         { expiresIn: "2 days" },
         (err, token) => {
           return res.json({
